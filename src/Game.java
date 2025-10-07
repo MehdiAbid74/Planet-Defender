@@ -1,11 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.imageio.ImageIO;
+import java.io.InputStream;
+import java.awt.image.BufferedImage;
 
 public class Game extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(Game::new);
     }
+
     public Game() {
         setTitle("Planet Defender");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -15,6 +19,10 @@ public class Game extends JFrame {
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+
+        // Charger les assets (image du fusil)
+        Assets.load();
+
         panel.start();
     }
 }
@@ -26,7 +34,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     private GameState state = GameState.START;
     private boolean enterPressed = false;
 
-    // === NOUVEAU : joueur ===
+    // Joueur
     private final Player player = new Player(380, 500);
 
     public GamePanel() {
@@ -38,7 +46,8 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     public void start() { timer.start(); }
 
-    @Override public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
         updateGame();
         repaint();
     }
@@ -49,7 +58,6 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                 if (enterPressed) state = GameState.RUNNING;
                 break;
             case RUNNING:
-                // === NOUVEAU : mise à jour du joueur ===
                 player.update();
                 break;
             case LEVEL_COMPLETE:
@@ -59,7 +67,8 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    @Override protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.white);
         switch (state) {
@@ -68,7 +77,6 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                 break;
             case RUNNING:
                 g.drawString("HUD: score=0 lives=3 level=1", 10, 20);
-                // === NOUVEAU : dessin du joueur ===
                 player.draw(g);
                 break;
             case LEVEL_COMPLETE:
@@ -87,27 +95,29 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         g.drawString(text, x, y);
     }
 
-    @Override public void keyPressed(KeyEvent e) {
+    @Override
+    public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         if (code == KeyEvent.VK_ENTER) enterPressed = true;
 
-        // === NOUVEAU : contrôles quand le jeu tourne ===
         if (state == GameState.RUNNING) {
             player.keyPressed(code);
         }
     }
 
-    @Override public void keyReleased(KeyEvent e) {
+    @Override
+    public void keyReleased(KeyEvent e) {
         if (state == GameState.RUNNING) {
             player.keyReleased(e.getKeyCode());
         }
     }
 
-    @Override public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {}
 }
 
 // ===================
-// Classe Player simple
+// Classe Player
 // ===================
 class Player {
     private int x, y, width, height, speed;
@@ -116,8 +126,8 @@ class Player {
     public Player(int startX, int startY) {
         this.x = startX;
         this.y = startY;
-        this.width = 40;
-        this.height = 40;
+        this.width = 80;   // taille de l'image (ajuste si besoin)
+        this.height = 80;
         this.speed = 5;
     }
 
@@ -135,8 +145,7 @@ class Player {
     }
 
     public void draw(Graphics g) {
-        g.setColor(Color.white);
-        g.fillRect(x, y, width, height);
+        g.drawImage(Assets.PLAYER, x, y, width, height, null);
     }
 
     public void keyPressed(int keyCode) {
@@ -151,5 +160,28 @@ class Player {
         if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN)  down = false;
         if (keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_LEFT)  left = false;
         if (keyCode == KeyEvent.VK_D || keyCode == KeyEvent.VK_RIGHT) right = false;
+    }
+}
+
+// ===================
+// Classe Assets
+// ===================
+class Assets {
+    public static Image PLAYER;
+
+    public static void load() {
+        try (InputStream in = Assets.class.getResourceAsStream("/assets/Gun.png")) {
+            if (in == null) throw new IllegalStateException("Gun.png introuvable dans /assets");
+            BufferedImage img = ImageIO.read(in);
+            PLAYER = img;
+        } catch (Exception e) {
+            System.err.println("Erreur chargement Gun.png : " + e.getMessage());
+            // fallback : carré blanc si l'image n'est pas trouvée
+            PLAYER = new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = ((BufferedImage) PLAYER).getGraphics();
+            g.setColor(Color.white);
+            g.fillRect(0, 0, 40, 40);
+            g.dispose();
+        }
     }
 }
