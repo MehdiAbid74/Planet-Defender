@@ -1,0 +1,1 @@
+public enum GameState { START, RUNNING, LEVEL_COMPLETE, GAME_OVER }
