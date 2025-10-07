@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.imageio.ImageIO;
 import java.io.InputStream;
-import java.io.BufferedInputStream; // <— pour le son
+import java.io.BufferedInputStream;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +25,7 @@ public class Game extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
-        Assets.load();   // charge Gun.png
+        Assets.load(); // load images
 
         panel.start();
     }
@@ -40,10 +40,10 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private final Player player = new Player(380, 500);
 
-    // --- bullets ---
+    // bullets
     private final List<Bullet> bullets = new ArrayList<>();
     private long lastShotTimeMs = 0;
-    private final long shotCooldownMs = 180; // délai entre 2 tirs
+    private final long shotCooldownMs = 180; // time between 2 shots
 
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
@@ -67,7 +67,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
             case RUNNING:
                 player.update();
 
-                // update bullets + nettoyage
+                // update and remove bullets off-screen
                 Iterator<Bullet> it = bullets.iterator();
                 while (it.hasNext()) {
                     Bullet b = it.next();
@@ -90,9 +90,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                 break;
             case RUNNING:
                 g.drawString("HUD: score=0 lives=3 level=1", 10, 20);
-                // draw bullets
                 for (Bullet b : bullets) b.draw(g);
-                // draw player
                 player.draw(g);
                 break;
             case LEVEL_COMPLETE:
@@ -116,14 +114,12 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (now - lastShotTimeMs < shotCooldownMs) return; // cooldown
         lastShotTimeMs = now;
 
-        // bullet part du haut-centre du joueur
-        int bx = player.getCenterX() - 2;   // 4px de large
-        int by = player.getY() - 10;        // juste au-dessus
-        bullets.add(new Bullet(bx, by, -10)); // vers le haut
+        int bx = player.getCenterX() - 2;
+        int by = player.getY() - 10;
+        bullets.add(new Bullet(bx, by, -10)); // shoot upward
 
-        // --- SON DU TIR ---
+        // play sound
         Assets.playSound("/assets/shoot.wav");
-        // System.out.println("pew"); // debug si besoin
     }
 
     @Override public void keyPressed(KeyEvent e) {
@@ -155,7 +151,7 @@ class Player {
     public Player(int startX, int startY) {
         this.x = startX;
         this.y = startY;
-        this.width = 80;   // ajuste selon Gun.png
+        this.width = 80;
         this.height = 80;
         this.speed = 5;
     }
@@ -166,7 +162,7 @@ class Player {
         if (left) x -= speed;
         if (right) x += speed;
 
-        // limites écran 800x600
+        // screen limits
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         if (x + width > 800) x = 800 - width;
@@ -177,7 +173,6 @@ class Player {
         g.drawImage(Assets.PLAYER, x, y, width, height, null);
     }
 
-    // getters utiles
     public int getX(){ return x; }
     public int getY(){ return y; }
     public int getCenterX(){ return x + width/2; }
@@ -197,11 +192,11 @@ class Player {
 }
 
 // ===================
-// Bullet (tir du joueur)
+// Bullet
 // ===================
 class Bullet {
     private int x, y;
-    private final int speedY;       // négatif = vers le haut
+    private final int speedY;
     private final int width = 4;
     private final int height = 12;
 
@@ -222,7 +217,6 @@ class Bullet {
         return y + height >= 0 && y <= h && x + width >= 0 && x <= w;
     }
 
-    // pour collisions plus tard
     public Rectangle getBounds() { return new Rectangle(x, y, width, height); }
 }
 
@@ -234,11 +228,11 @@ class Assets {
 
     public static void load() {
         try (InputStream in = Assets.class.getResourceAsStream("/assets/Gun.png")) {
-            if (in == null) throw new IllegalStateException("Gun.png introuvable");
+            if (in == null) throw new IllegalStateException("Gun.png not found");
             BufferedImage img = ImageIO.read(in);
             PLAYER = img;
         } catch (Exception e) {
-            System.err.println("Erreur image: " + e.getMessage());
+            System.err.println("Error loading image: " + e.getMessage());
             PLAYER = new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
             Graphics g = ((BufferedImage) PLAYER).getGraphics();
             g.setColor(Color.white);
@@ -247,19 +241,19 @@ class Assets {
         }
     }
 
-    // --- lecteur de son robuste (WAV PCM) ---
+    // play short sound (WAV PCM)
     public static void playSound(String path) {
         new Thread(() -> {
             try (InputStream raw = Assets.class.getResourceAsStream(path)) {
-                if (raw == null) throw new IllegalStateException("Son introuvable: " + path);
+                if (raw == null) throw new IllegalStateException("Sound not found: " + path);
                 try (BufferedInputStream buf = new BufferedInputStream(raw);
                      AudioInputStream audioIn = AudioSystem.getAudioInputStream(buf)) {
                     Clip clip = AudioSystem.getClip();
                     clip.open(audioIn);
-                    clip.start(); // joue une fois
+                    clip.start();
                 }
             } catch (Exception e) {
-                System.err.println("Erreur son: " + e.getMessage());
+                System.err.println("Sound error: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
