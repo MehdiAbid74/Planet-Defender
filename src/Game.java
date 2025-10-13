@@ -18,3 +18,6 @@ public class Game extends JFrame {
         panel.start();
     }
 }
+//todo
+//niv 2
+//dokumnetiaon

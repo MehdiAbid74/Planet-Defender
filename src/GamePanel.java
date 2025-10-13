@@ -11,6 +11,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean enterPressed = false;
 
     private final Player player = new Player(380, 500);
+    // --- Level and Boss Fight ---
+    private int currentLevel = 1;
+    private Boss boss = null;
+    private final List<Rocket> rockets = new ArrayList<>();
 
     // bullets
     private final List<Bullet> bullets = new ArrayList<>();
@@ -117,6 +121,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             case GAME_OVER:
                 // wait for R to restart
                 break;
+
         }
     }
 

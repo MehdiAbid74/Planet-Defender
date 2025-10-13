@@ -8,6 +8,8 @@ import java.io.InputStream;
 public class Assets {
     public static Image PLAYER;
     public static Image ENEMY;
+    public static Image BOSS;
+    public static Image ROCKET;
 
     public static void load() {
         // Player
@@ -27,6 +29,16 @@ public class Assets {
             System.err.println("Error loading Enemies.png: " + e.getMessage());
             ENEMY = fallback(50, 35, Color.RED);
         }
+        // Boss
+        try (InputStream in = Assets.class.getResourceAsStream("/assets/Boss.png")) {
+            if (in != null) BOSS = ImageIO.read(in);
+        } catch (Exception ignored) {}
+
+        // Rocket
+        try (InputStream in = Assets.class.getResourceAsStream("/assets/Rocket.png")) {
+            if (in != null) ROCKET = ImageIO.read(in);
+        } catch (Exception ignored) {}
+
     }
 
     private static BufferedImage fallback(int w, int h, Color c) {
