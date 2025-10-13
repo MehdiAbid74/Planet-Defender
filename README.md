@@ -2,8 +2,6 @@ Planet Defender
 ----------------
 
 Author: Mohamed Mehdi Abid
-Course: Programmieren 1 - Wintersemester 2025/26
-Professor: Prof. Dr. Jan Rexilius
 
 How to run:
 1. Open the project in IntelliJ or VSCode.
