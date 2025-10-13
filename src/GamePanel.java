@@ -183,7 +183,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         switch (state) {
             case START:
-                drawCentered(g, "PRESS ENTER TO START");
+                drawCentered(g,
+                        "Aliens want to take over our Earth for their secret plan to drain all energy. \n" +
+                        " Go fight \n" +
+                        " Save the world\n" +
+                        " PRESS ENTER TO START ");
                 g.drawString("Move: WASD/Arrows  |  Shoot: SPACE", 10, 40);
                 break;
 
@@ -205,7 +209,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 break;
 
             case LEVEL_COMPLETE:
-                drawCentered(g, "YOU WIN!  PRESS ENTER TO PLAY AGAIN");
+                drawCentered(g, "the world is saved!  PRESS ENTER TO PLAY AGAIN");
                 break;
 
             case GAME_OVER:

@@ -19,5 +19,4 @@ public class Game extends JFrame {
     }
 }
 //todo
-//niv 2
 //dokumnetiaon
